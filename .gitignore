@@ -1,0 +1,7 @@
+# ignore giles
+*.pyc
+__pycache__
+data
+refers
+
+
