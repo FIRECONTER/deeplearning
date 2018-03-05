@@ -12,6 +12,9 @@ class FlickrItem(scrapy.Item):
     # define the fields for your item here like:
     # name = scrapy.Field()
     # img_url img_desc and img_id
-    img_urls = scrapy.Field()
-    img_descs = scrapy.Field()
-    img_ids = scrapy.Field()
+    # each item contains just one image and the related text information
+    image_url = scrapy.Field()
+    image_desc = scrapy.Field()
+    image_id = scrapy.Field()
+    image_path = scrapy.Field()
+    isvalid = scrapy.Field()

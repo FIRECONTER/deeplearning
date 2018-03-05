@@ -10,8 +10,21 @@ from crawlersrcdata.items import FlickrItem
 
 class FlickrSpider(scrapy.spiders.Spider):
     name = 'flickr'
-    allowed_domains = ['illinois.edu']
+    # very important allowed domains if the data come from different domain
+    allowed_domains = ['illinois.edu', 'flickr.com']
     start_urls = ['http://nlp.cs.illinois.edu/HockenmaierGroup/8k-pictures.html']
+
+    def parse2(self, response):
+        """Parse the url form the image site url"""
+        item = response.meta['item']
+        image_urls = response.xpath('//img/@src').extract()
+        if len(image_urls) == 1:
+            print(' current image does not exist because image length is 1')
+            item['isvalid'] = False
+        else:
+            item['isvalid'] = True
+            item['image_url'] = image_urls[0]
+        return item
 
     def parse(self, response):
         """Parse the response data from spider."""
@@ -21,14 +34,10 @@ class FlickrSpider(scrapy.spiders.Spider):
         # some links do not exist Image Not Found
         # one response with one spider item object
         img_items = response.xpath('//table/tr/td')
-        img_urls = []
-        img_descs = []
-        img_ids = []
         invalid_image_num = 0
         valid_image_num = 0
         print(' image url and desc length is %d ' % len(img_items))
         n = int(len(img_items)/2)
-        res_item = FlickrItem()
         for i in range(n):
             img_url_item = img_items[2*i]
             img_desc_item = img_items[2*i+1]
@@ -39,18 +48,16 @@ class FlickrSpider(scrapy.spiders.Spider):
             else:
                 # get the url and image descriptions
                 valid_image_num += 1
-                img_ids.append('img'+str(valid_image_num))
-                img_urls.append(img_url_item.xpath('a/@href').extract()[0])
+                item = FlickrItem()
+                item['image_id'] = 'img_' + str(valid_image_num)
+                image_site_url = img_url_item.xpath('a/@href').extract()[0]
                 # get all the descriptions about every image
                 current_txts = img_desc_item.xpath('ul/li/text()').extract()
-                tmp_arr = []
-                for txt_item in current_txts:
-                    tmp_arr.append(txt_item.replace('\n', ''))
-                img_descs.append(tmp_arr)
+                # tmp_arr = []
+                # for txt_item in current_txts:
+                #     tmp_arr.append(txt_item.replace('\n', ''))
+                item['image_desc'] = current_txts
+                yield scrapy.Request(image_site_url, callback=self.parse2, meta={'item': item})
         print(' all the image items is %d ' % n)
         print(' the valid image items is %d ' % valid_image_num)
         print(' the invalid image items is %d ' % invalid_image_num)
-        res_item['img_urls'] = img_urls
-        res_item['img_descs'] = img_descs
-        res_item['img_ids'] = img_ids
-        return res_item
