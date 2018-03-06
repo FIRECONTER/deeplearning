@@ -11,8 +11,13 @@ import os
 
 img_descs_folder = 'data/txt'
 img_urls_dir = 'D:\\Alex\\Learn\\BigData\\deeplearning\\sampleproject\\captiongenerationmodel\\src\\crawlersrcdata\\data\\img\\'
+data_log_dir = 'data/logs'
 # deal with the image url and save the image file
+# write the error image information to the log file
+
+
 class MyImagePipeline(ImagesPipeline):
+
     def get_media_requests(self, item, info):
         if item['isvalid']:
             yield scrapy.Request('https:'+item['image_url'])
@@ -21,11 +26,12 @@ class MyImagePipeline(ImagesPipeline):
         image_paths = [x['path'] for ok, x in results if ok]
         if not image_paths:
             print(' download current image error with id %s ' % item['image_id'])
+            with open(os.path.join(data_log_dir, 'datalog.txt'), 'a+') as datalog:
+                datalog.write(' download error image id %s and results status %s and url is %s \n' % (item['image_id'], results[0][0], results[0][1]['url']))
             raise DropItem("Item contains no images")
         old_name = image_paths[0]
         os.rename(img_urls_dir+old_name,img_urls_dir+'full\\'+item['image_id']+'.jpg')
         return item
-
 
 # deal with the descs about the image
 class MyDescPipeline(object):
