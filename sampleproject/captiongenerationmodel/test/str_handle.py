@@ -20,5 +20,5 @@ if __name__ == '__main__':
     # 一个非常经典的应用 将字符串中的标点符号全部去掉
     res_1 = str.maketrans('', '', string.punctuation)
     t2 = 'dsff,errr,,sdsd:dsdsd?'
-    print(t2.translate(res_1))  # t2中所有的标点符号可以被去除
+    print(t2.translate(res_1))  # t2中所有的标点符号可以被去除 标点符号一般在word划分的时候是跟随word在一起的
     # 将调用translate 的字符串中的字符根据trans table 中的映射关系进行转换
